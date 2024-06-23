@@ -200,8 +200,8 @@
         <pre>{{ article }}</pre>
         <h2>Summarized Article</h2>
         <pre>{{ summary }}</pre>
-        {% endif %}
-        
+        <button id="save-summary-btn" class="btn btn-primary">Save Summary</button>
+        {% endif %}        
         {% if rouge_scores %}
         <hr>
         <h2>ROUGE Scores</h2>
@@ -229,5 +229,20 @@
                 });
             });
     </script>
+    <script>
+        document.getElementById('save-summary-btn').addEventListener('click', function() {
+            var summaryText = document.querySelector('pre:last-of-type').innerText;
+            var blob = new Blob([summaryText], { type: 'text/plain' });
+    
+            var a = document.createElement('a');
+            a.download = 'summarized_article.txt';
+            a.href = window.URL.createObjectURL(blob);
+            a.dataset.downloadurl = ['text/plain', a.download, a.href].join(':');
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    </script>    
 </body>
 </html>
