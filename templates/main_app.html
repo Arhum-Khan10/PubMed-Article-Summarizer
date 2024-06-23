@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PubMed Article Summarizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #fafafa;
+            color: #333333;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+            /* Ensure no scrolling occurs on the background itself */
+        }
+
+        .animated-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #4CAF50, #007bff, #ff9800, #e91e63);
+            background-size: 400% 400%;
+            animation: gradient-animation 15s ease infinite;
+        }
+
+        @keyframes gradient-animation {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .app-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            overflow: auto;
+            /* Enable scrolling for content inside .app-container */
+        }
+
+        h1,
+        h2 {
+            color: #333333;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fade-in 0.5s ease-in-out;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        form {
+            margin-top: 20px;
+            animation: slide-down 0.5s ease-in-out;
+        }
+
+        @keyframes slide-down {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333333;
+            font-weight: bold;
+            animation: fade-in 0.5s ease-in-out;
+        }
+
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+            animation: fade-in 0.5s ease-in-out;
+        }
+
+        .file-upload input[type=file] {
+            position: absolute;
+            font-size: 18px;
+            opacity: 0;
+            right: 0;
+            top: 0;
+        }
+
+        .file-upload .file-select {
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: #007bff;
+            /* Blue color */
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .file-upload .file-select:hover {
+            background-color: #0056b3;
+            /* Darker blue */
+        }
+
+        button[type="submit"] {
+            background-color: #4CAF50;
+            /* Green color */
+            color: #ffffff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin-top: 20px;
+            animation: fade-in 0.5s ease-in-out;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+            /* Darker green */
+        }
+
+        hr {
+            border-color: #cccccc;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            animation: fade-in 0.5s ease-in-out;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 4px;
+            color: #333333;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            animation: fade-in 0.5s ease-in-out;
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-container">
+        <div class="animated-background"></div>
+    </div>
+    <div class="app-container">
+        <h1>PubMed Article Summarizer</h1>
+        <form method="post" action="/main_app" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Upload a PubMed Article:</label>
+                <div class="file-upload">
+                    <label class="file-select">
+                        Choose File
+                        <input type="file" id="file" name="file" accept=".txt">
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="article">Select an Article:</label>
+                <select id="article" name="article" class="form-control">
+                    <option value="">Select...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="summary_type">Select Summary Type:</label>
+                <select id="summary_type" name="summary_type" class="form-control">
+                    <option value="brief">Brief Summary</option>
+                    <option value="detailed">Detailed Summary</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Summarize Article</button>
+        </form>
+
+        {% if article %}
+        <hr>
+        <h2>Original Article</h2>
+        <pre>{{ article }}</pre>
+        <h2>Summarized Article</h2>
+        <pre>{{ summary }}</pre>
+        {% endif %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Function to populate dropdown with article titles
+        fetch('/get_articles')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('article');
+                data.forEach((title, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;  // Set value as index
+                    option.text = title;   // Display text as article title
+                    select.appendChild(option);
+                });
+            });
+    </script>
+</body>
+
+</html>
