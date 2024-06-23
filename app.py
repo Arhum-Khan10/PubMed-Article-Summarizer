@@ -5,6 +5,8 @@ from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
 import re
 import nltk
+import requests
+from rouge import Rouge  # Import Rouge for ROUGE scores calculation
 
 nltk.download('punkt')
 
@@ -21,31 +23,49 @@ def preprocess_text(text):
     text = text.lower()  # Convert to lowercase
     return text
 
-# Function to summarize text (brief)
-def summarize_text_brief(text, num_sentences=5):
-    parser = PlaintextParser.from_string(text, Tokenizer("english"))
-    summarizer = LsaSummarizer()
-    summary = summarizer(parser.document, num_sentences)
-    return ' '.join([str(sentence) for sentence in summary])
+# Function to calculate ROUGE scores
+def calculate_rouge_scores(summary, reference):
+    rouge = Rouge()
+    scores = rouge.get_scores(summary, reference)
+    return scores
 
-# Function to summarize text (detailed)
-def summarize_text_detailed(text, num_sentences=10):
+# Function to summarize text and calculate ROUGE scores (brief)
+def summarize_text_brief_with_metrics(text, reference, num_sentences=17):
     parser = PlaintextParser.from_string(text, Tokenizer("english"))
     summarizer = LsaSummarizer()
     summary = summarizer(parser.document, num_sentences)
-    return ' '.join([str(sentence) for sentence in summary])
+    summary_text = ' '.join([str(sentence) for sentence in summary])
+    
+    # Calculate ROUGE scores
+    rouge_scores = calculate_rouge_scores(summary_text, reference)
+    
+    return summary_text, rouge_scores
+
+# Function to summarize text and calculate ROUGE scores (detailed)
+def summarize_text_detailed_with_metrics(text, reference, num_sentences=25):
+    parser = PlaintextParser.from_string(text, Tokenizer("english"))
+    summarizer = LsaSummarizer()
+    summary = summarizer(parser.document, num_sentences)
+    summary_text = ' '.join([str(sentence) for sentence in summary])
+    
+    # Calculate ROUGE scores
+    rouge_scores = calculate_rouge_scores(summary_text, reference)
+    
+    return summary_text, rouge_scores
 
 # Endpoint to retrieve article titles for dropdown
 @app.route('/get_articles', methods=['GET'])
 def get_articles():
-    # Fetch titles from the first 10 articles in the 'train' section of the dataset
-    article_titles = [f"Article {i+1}" for i in range(10)]  
+    # Fetch titles from the first 50 articles in the 'train' section of the dataset
+    article_titles = [f"Article {i+1}" for i in range(25)]  
     return jsonify(article_titles)
 
 # Define hardcoded usernames and passwords
 USER_CREDENTIALS = {
     "user1": "password1",
-    "user2": "password2"
+    "user2": "password2",
+    "user3": "password3",
+    "user4": "password4",
 }
 
 # Function to authenticate users
@@ -53,6 +73,23 @@ def authenticate(username, password):
     if username in USER_CREDENTIALS and USER_CREDENTIALS[username] == password:
         return True
     return False
+
+# Function to summarize text using Gemini API
+def summarize_with_gemini(text, api_key):
+    url = "https://api.gemini.com/summarize"  
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "text": text
+    }
+    response = requests.post(url, json=data, headers=headers)
+    if response.status_code == 200:
+        return response.json().get("summary", "No summary available.")
+    else:
+        return "Error in summarizing with Gemini."
+
 
 # Login route
 @app.route('/', methods=['GET', 'POST'])
@@ -67,7 +104,6 @@ def login():
             flash("Invalid credentials. Please try again.", 'error')
     return render_template('login.html')
 
-# Main app route
 @app.route('/main_app', methods=['GET', 'POST'])
 def main_app():
     if request.method == 'POST':
@@ -79,24 +115,44 @@ def main_app():
             if uploaded_file:
                 article = uploaded_file.read().decode("utf-8")
                 preprocessed_article = preprocess_text(article)
+                reference = article  # Use the original article as reference for ROUGE scores
                 if summary_type == 'brief':
-                    summary = summarize_text_brief(preprocessed_article)
+                    summary, rouge_scores = summarize_text_brief_with_metrics(preprocessed_article, reference)
                 elif summary_type == 'detailed':
-                    summary = summarize_text_detailed(preprocessed_article)
-                return render_template('main_app.html', article=article, summary=summary)
+                    summary, rouge_scores = summarize_text_detailed_with_metrics(preprocessed_article, reference)
+                return render_template('main_app.html', article=article, summary=summary, rouge_scores=rouge_scores)
             elif selected_article_index is not None:
                 article_index = int(selected_article_index)
                 selected_article = dataset['train'][article_index]['article']  # Correctly access the article's text
                 preprocessed_article = preprocess_text(selected_article)
+                reference = selected_article  # Use the selected article as reference for ROUGE scores
                 if summary_type == 'brief':
-                    summary = summarize_text_brief(preprocessed_article)
+                    summary, rouge_scores = summarize_text_brief_with_metrics(preprocessed_article, reference)
                 elif summary_type == 'detailed':
-                    summary = summarize_text_detailed(preprocessed_article)
-                return render_template('main_app.html', article=selected_article, summary=summary)
+                    summary, rouge_scores = summarize_text_detailed_with_metrics(preprocessed_article, reference)
+                return render_template('main_app.html', article=selected_article, summary=summary, rouge_scores=rouge_scores)
 
         flash("Please select an article or upload a file.", 'error')
     
     return render_template('main_app.html')
+
+# AI summarization route
+@app.route('/ai_summarizer', methods=['GET', 'POST'])
+def ai_summarizer():
+    if request.method == 'POST':
+        selected_article_index = request.form.get('article')  # Get selected article index from dropdown
+
+        if selected_article_index is not None:
+            article_index = int(selected_article_index)
+            selected_article = dataset['train'][article_index]['article']  # Correctly access the article's text
+            preprocessed_article = preprocess_text(selected_article)
+            api_key = "AIzaSyBv0qLCjmsgdMxxiNmahFyLIlRr59XbpFQ"  # Use your API key here
+            summary = summarize_with_gemini(preprocessed_article, api_key)
+            return render_template('ai_summarizer.html', article=selected_article, summary=summary)
+
+        flash("Please select an article.", 'error')
+    
+    return render_template('ai_summarizer.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
