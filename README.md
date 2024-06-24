@@ -12,14 +12,14 @@ To run the PubMed Article Summarizer, you'll need the following dependencies:
 
 ### Installation:
 1. Clone the repository from GitHub using
-  - ```git clone https://github.com/your-username/pubmed-article-summarizer.git```
-  - ```cd pubmed-article-summarizer```
+    - ```git clone https://github.com/your-username/pubmed-article-summarizer.git```
+    - ```cd pubmed-article-summarizer```
 2. Install all the libraries by running the following command on the cmd or terminal
-  - ```pip install flask datasets sumy nltk rouge-score requests```
+    - ```pip install flask datasets sumy nltk rouge-score requests```
 
 ### Features
 #### Efficient Text Preprocessing
-- Text Cleaning: Removes extra spaces, citations, and converts text to lowercase.
+    - Text Cleaning: Removes extra spaces, citations, and converts text to lowercase.
 #### Summarization
 - Latent Semantic Analysis (LSA) Summarizes text using LSA with options for brief or detailed summaries.
 Quality Evaluation
