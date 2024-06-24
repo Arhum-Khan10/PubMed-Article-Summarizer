@@ -14,6 +14,7 @@ nltk.download('punkt')
 
 # Initialize the Flask app
 app = Flask(__name__)
+app.secret_key = "my_secret_key"    
 
 # Load the dataset from disk
 dataset = load_from_disk("pubmed-summarization")
