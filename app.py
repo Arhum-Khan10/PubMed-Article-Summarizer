@@ -18,6 +18,7 @@ app.secret_key = "my_secret_key"
 
 # Load the dataset from disk
 dataset = load_from_disk("pubmed-summarization")
+dataset = dataset.filter(lambda x: x['article'] != '')
 
 # Define hardcoded usernames and passwords
 USER_CREDENTIALS = {
