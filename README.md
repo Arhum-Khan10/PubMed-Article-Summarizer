@@ -15,7 +15,7 @@ To run the PubMed Article Summarizer, you'll need the following dependencies:
   - ```git clone https://github.com/your-username/pubmed-article-summarizer.git```
   - ```cd pubmed-article-summarizer```
 2. Install all the libraries by running the following command on the cmd or terminal
-  ```pip install flask datasets sumy nltk rouge-score requests```
+  - ```pip install flask datasets sumy nltk rouge-score requests```
 
 ### Features
 #### Efficient Text Preprocessing
