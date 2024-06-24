@@ -30,11 +30,11 @@ Quality Evaluation
   - Start the flask application by running the following command on your cmd or terminal:
     - ```python app.py```
 2. #### Login
-  - Access the web application at http://127.0.0.1:5000/.
-  - Use one of the predefined usernames and passwords to log in.
+      - Access the web application at http://127.0.0.1:5000/.
+      - Use one of the predefined usernames and passwords to log in.
 3. #### Upload or Select an article
-  - Upload a PubMed article in text format.
-  - Or, select an article from the preloaded dataset using the dropdown menu.
+      - Upload a PubMed article in text format.
+      - Or, select an article from the preloaded dataset using the dropdown menu.
 
 ### Main Application
 - Summarize: Choose the type of summary (brief or detailed) and view the original and summarized articles along with the ROUGE scores.
