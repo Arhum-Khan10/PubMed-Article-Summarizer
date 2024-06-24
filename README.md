@@ -28,7 +28,7 @@ Quality Evaluation
 ## How to Use
 1. #### Setup
   - Start the flask application by running the following command on your cmd or terminal:
-      ```python app.py```
+    - ```python app.py```
 2. #### Login
   - Access the web application at http://127.0.0.1:5000/.
   - Use one of the predefined usernames and passwords to log in.
